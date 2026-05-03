@@ -13,12 +13,12 @@
 (function(){
   try{
     const app=firebase.initializeApp({
-      apiKey:"AIzaSyCZHG2CLjxVFepUDSYQvYzj3EQ5V4iaDl0",
-      authDomain:"sup-tata-val.firebaseapp.com",
-      projectId:"sup-tata-val",
-      storageBucket:"sup-tata-val.firebasestorage.app",
-      messagingSenderId:"81131316890",
-      appId:"1:81131316890:web:6d87f4e9b9eacb5ada6123"
+      apiKey:"AIzaSyCUdOZhF4jWv53wgi13clrz6KfUUIH4BZ4",
+      authDomain:"caisses-bc42b.firebaseapp.com",
+      projectId:"caisses-bc42b",
+      storageBucket:"caisses-bc42b.firebasestorage.app",
+      messagingSenderId:"777320640866",
+      appId:"1:777320640866:web:dc70ac1ab48b213fedfc3b"
     });
     window.db=firebase.firestore(app);
     window.fbReady=true;
@@ -737,14 +737,43 @@ const SESSION_KEY = 'caisse_session';
 //  FIREBASE
 // ─────────────────────────────────────────────────────────
 function getDB(){return window.db;}
+
+// Mapping collection → clé localStorage
+const COL_MAP={'pos_users':'cf_users','pos_articles':'cf_articles','pos_categories':'cf_categories','pos_transactions':'cf_transactions','pos_connlog':'cf_connlog'};
+
 async function fbSave(col,id,data){
-  try{ if(!getDB())return; await getDB().collection(col).doc(String(id)).set(data); }
-  catch(e){ console.error('fbSave',col,id,e); }
+  // 1) Sauvegarder en local immédiatement
+  const lkey=COL_MAP[col];
+  if(lkey){
+    try{
+      const arr=JSON.parse(localStorage.getItem(lkey)||'[]');
+      const idx=arr.findIndex(x=>x.id===String(id)||x._fbid===String(id));
+      if(idx>=0) arr[idx]={...data};
+      else arr.push({...data});
+      localStorage.setItem(lkey,JSON.stringify(arr));
+    }catch(e){}
+  }
+  // 2) Envoyer à Firebase sans bloquer (fire & forget)
+  if(getDB()){
+    getDB().collection(col).doc(String(id)).set(data).catch(e=>console.warn('fbSave Firebase:',col,e));
+  }
 }
+
 async function fbDelete(col,id){
-  try{ if(!getDB())return; await getDB().collection(col).doc(String(id)).delete(); }
-  catch(e){ console.error('fbDelete',e); }
+  // 1) Supprimer en local immédiatement
+  const lkey=COL_MAP[col];
+  if(lkey){
+    try{
+      const arr=JSON.parse(localStorage.getItem(lkey)||'[]');
+      localStorage.setItem(lkey,JSON.stringify(arr.filter(x=>x.id!==String(id)&&x._fbid!==String(id))));
+    }catch(e){}
+  }
+  // 2) Firebase sans bloquer
+  if(getDB()){
+    getDB().collection(col).doc(String(id)).delete().catch(e=>console.warn('fbDelete Firebase:',col,e));
+  }
 }
+
 async function fbGetAll(col){
   try{
     if(!getDB())return[];
@@ -778,154 +807,146 @@ async function doLogin(){
   if(!u||!p){err.textContent='Remplissez les deux champs.';err.style.display='block';return;}
   btn.textContent='Connexion...';btn.disabled=true;
 
-  const safetyTimer=setTimeout(()=>{
-    btn.textContent='Se connecter →';btn.disabled=false;
-    err.textContent='⚠️ Délai dépassé. Vérifiez votre connexion ou les règles Firestore.';err.style.display='block';
-  },10000);
+  // 1) Vérifier d'abord le cache local (instantané)
+  const localUsers=getLocalUsers();
+  const foundLocal=localUsers.find(x=>x.username===u&&x.pass===p);
+  if(foundLocal){
+    btn.textContent='Se connecter \u2192';btn.disabled=false;
+    currentUser=foundLocal;
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:u,pass:p,logId:'local'}));
+    launchApp(true); // true = déjà auth, pas besoin de recharger users
+    return;
+  }
 
+  // 2) Sinon essayer Firebase avec timeout court (3s)
   try{
-    await ensureDefaultAdmin();
-    const fbUsers=await fbGetAll('pos_users');
-    const allUsers=fbUsers.length>0?fbUsers:[{id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'}];
-    const found=allUsers.find(x=>x.username===u&&x.pass===p);
-    clearTimeout(safetyTimer);
-    if(!found){
-      err.textContent='❌ Identifiants incorrects.';err.style.display='block';
-      btn.textContent='Se connecter →';btn.disabled=false;return;
-    }
-    const logId='log_'+Date.now();
-    fbSave('pos_connlog',logId,{id:logId,username:u,loginTime:new Date().toISOString(),logoutTime:null,sessionId:'s'+Date.now()}).catch(()=>{});
-    sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:u,pass:p,logId}));
+    const fbUsers=await Promise.race([
+      fbGetAll('pos_users'),
+      new Promise(res=>setTimeout(()=>res([]),3000))
+    ]);
+    if(fbUsers.length>0) saveLocalUsers(fbUsers);
+    const all=fbUsers.length>0?fbUsers:localUsers;
+    const found=all.find(x=>x.username===u&&x.pass===p);
+    btn.textContent='Se connecter \u2192';btn.disabled=false;
+    if(!found){err.textContent='\u274c Identifiants incorrects.';err.style.display='block';return;}
+    fbSave('pos_connlog','log_'+Date.now(),{id:'log_'+Date.now(),username:u,loginTime:new Date().toISOString(),logoutTime:null}).catch(()=>{});
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:u,pass:p,logId:'fb'}));
     currentUser=found;
-    launchApp();
+    launchApp(false);
   }catch(e){
-    clearTimeout(safetyTimer);
-    console.error('Login error:',e);
-    if(u==='admin'&&p==='admin123'){
-      sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:u,pass:p,logId:'local'}));
-      currentUser={id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'};
-      launchApp();
-    } else {
-      err.textContent='❌ Erreur Firebase. Réessayez ou vérifiez les règles Firestore.';err.style.display='block';
-      btn.textContent='Se connecter →';btn.disabled=false;
-    }
+    btn.textContent='Se connecter \u2192';btn.disabled=false;
+    err.textContent='\u274c Erreur de connexion. R\u00e9essayez.';err.style.display='block';
   }
 }
 
 async function tryAutoLogin(){
   const sess=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
   if(!sess){showLoading(false);document.getElementById('login-page').style.display='flex';return;}
-  showLoading(true);
-  animateProgress();
-  try{
-    await ensureDefaultAdmin();
-    const fbUsers=await fbGetAll('pos_users');
-    const allUsers=fbUsers.length>0?fbUsers:[{id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'}];
-    const found=allUsers.find(x=>x.username===sess.username&&x.pass===sess.pass);
-    if(!found){
-      sessionStorage.removeItem(SESSION_KEY);
-      showLoading(false);document.getElementById('login-page').style.display='flex';return;
-    }
-    currentUser=found;
-    launchApp();
-  }catch(e){
-    console.error('AutoLogin error:',e);
-    // Fallback: si c'est admin, on laisse passer
-    if(sess.username==='admin'&&sess.pass==='admin123'){
-      currentUser={id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'};
-      launchApp();
-    } else {
-      sessionStorage.removeItem(SESSION_KEY);
-      showLoading(false);document.getElementById('login-page').style.display='flex';
-    }
+  // Vérif instantanée depuis cache local
+  const localUsers=getLocalUsers();
+  const found=localUsers.find(x=>x.username===sess.username&&x.pass===sess.pass);
+  if(found){currentUser=found;launchApp(true);return;}
+  showLoading(false);
+  document.getElementById('login-page').style.display='flex';
+}
+
+async function ensureDefaultAdmin(){
+  const localUsers=getLocalUsers();
+  if(!localUsers.find(x=>x.username==='admin')){
+    const admin={id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin',created:new Date().toISOString()};
+    localUsers.push(admin);
+    saveLocalUsers(localUsers);
+    fbSave('pos_users','u0',admin).catch(()=>{});
   }
 }
-async function ensureDefaultAdmin(){
+
+// ── Cache local (localStorage) pour fonctionner sans Firebase ──
+function getLocalUsers(){
   try{
-    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000));
-    const fbUsers=await Promise.race([fbGetAll('pos_users'),timeout]);
-    if(!fbUsers.find(x=>x.username==='admin')){
-      await fbSave('pos_users','u0',{id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin',created:new Date().toISOString()});
-    }
-  }catch(e){console.warn('ensureDefaultAdmin:',e);}
+    const d=localStorage.getItem('cf_users');
+    if(d){const p=JSON.parse(d);if(p.length>0)return p;}
+  }catch(e){}
+  // Compte admin par défaut toujours présent
+  return [{id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin',created:'2024-01-01T00:00:00.000Z'}];
 }
-function doLogout(){
-  const sess=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
-  if(sess?.logId) fbSave('pos_connlog',sess.logId,{id:sess.logId,username:currentUser?.username||'',loginTime:'',logoutTime:new Date().toISOString()}).catch(()=>{});
-  sessionStorage.removeItem(SESSION_KEY);
-  currentUser=null;
-  document.getElementById('app').style.display='none';
-  document.getElementById('login-page').style.display='flex';
-  document.getElementById('inp-user').value='';
-  document.getElementById('inp-pass').value='';
-  document.getElementById('btn-login').textContent='Se connecter →';
-  document.getElementById('btn-login').disabled=false;
-}
+function saveLocalUsers(arr){try{localStorage.setItem('cf_users',JSON.stringify(arr));}catch(e){}}
+function getLocalData(key){try{const d=localStorage.getItem(key);return d?JSON.parse(d):[];}catch(e){return[];}}
+function saveLocalData(key,arr){try{localStorage.setItem(key,JSON.stringify(arr));}catch(e){}}
 
-function showLoading(show){
-  const ls=document.getElementById('loading-screen');
-  ls.style.display=show?'flex':'none';
-}
-function animateProgress(){
-  let w=0;
-  const bar=document.getElementById('ls-bar');
-  const iv=setInterval(()=>{
-    w+=Math.random()*18;
-    if(w>85){clearInterval(iv);}
-    bar.style.width=Math.min(w,85)+'%';
-  },150);
-}
-function completeProgress(){
-  const bar=document.getElementById('ls-bar');
-  bar.style.width='100%';
-}
-
-// ─────────────────────────────────────────────────────────
-//  LAUNCH
-// ─────────────────────────────────────────────────────────
-async function launchApp(){
+async function launchApp(skipFbLoad){
   showLoading(true); animateProgress();
   document.getElementById('login-page').style.display='none';
 
-  // Timeout de 8s par requête Firebase — jamais bloqué
-  function fbSafe(col){
-    return Promise.race([
-      fbGetAll(col),
-      new Promise(res=>setTimeout(()=>res([]),8000))
-    ]);
+  if(skipFbLoad){
+    // Charger depuis cache local instantanément
+    users      = getLocalUsers();
+    articles   = getLocalData('cf_articles');
+    categories = getLocalData('cf_categories');
+    transactions = getLocalData('cf_transactions').sort((a,b)=>new Date(b.date)-new Date(a.date));
+    connLog    = getLocalData('cf_connlog').sort((a,b)=>new Date(b.loginTime||0)-new Date(a.loginTime||0));
+    completeProgress();
+    renderApp();
+    // Sync Firebase en arrière-plan (silencieux)
+    syncFromFirebase();
+  } else {
+    // Charger Firebase avec timeout 5s, fallback local
+    function fbSafe(col,localKey){
+      return Promise.race([
+        fbGetAll(col).then(r=>{if(r.length>0)saveLocalData(localKey,r);return r;}),
+        new Promise(res=>setTimeout(()=>res(getLocalData(localKey)),5000))
+      ]);
+    }
+    try{
+      const [fbUsers,fbArts,fbCats,fbTx,fbLogs]=await Promise.all([
+        fbSafe('pos_users','cf_users'),
+        fbSafe('pos_articles','cf_articles'),
+        fbSafe('pos_categories','cf_categories'),
+        fbSafe('pos_transactions','cf_transactions'),
+        fbSafe('pos_connlog','cf_connlog')
+      ]);
+      users=fbUsers; articles=fbArts; categories=fbCats;
+      transactions=fbTx.sort((a,b)=>new Date(b.date)-new Date(a.date));
+      connLog=fbLogs.sort((a,b)=>new Date(b.loginTime||0)-new Date(a.loginTime||0));
+    }catch(e){
+      users=getLocalUsers(); articles=getLocalData('cf_articles');
+      categories=getLocalData('cf_categories');
+      transactions=getLocalData('cf_transactions');
+      connLog=getLocalData('cf_connlog');
+    }
+    completeProgress();
+    renderApp();
   }
+}
 
-  try{
-    const [fbUsers,fbArts,fbCats,fbTx,fbLogs] = await Promise.all([
-      fbSafe('pos_users'), fbSafe('pos_articles'), fbSafe('pos_categories'),
-      fbSafe('pos_transactions'), fbSafe('pos_connlog')
-    ]);
-    users    = fbUsers;
-    articles = fbArts;
-    categories = fbCats;
-    transactions = fbTx.sort((a,b)=>new Date(b.date)-new Date(a.date));
-    connLog  = fbLogs.sort((a,b)=>new Date(b.loginTime)-new Date(a.loginTime));
-  }catch(e){
-    console.error('launchApp data load error:',e);
-    // On continue avec des tableaux vides — l'app s'ouvre quand même
-    users=[]; articles=[]; categories=[]; transactions=[]; connLog=[];
-  }
-
-  completeProgress();
+function renderApp(){
   setTimeout(()=>{
     showLoading(false);
     document.getElementById('app').style.display='block';
     document.getElementById('tb-username').textContent=currentUser.fullname||currentUser.username;
-    if(currentUser.role!=='admin'){
-      document.getElementById('tab-btn-acces').style.display='none';
-    }
+    if(currentUser.role!=='admin'){document.getElementById('tab-btn-acces').style.display='none';}
     updateCaisseDate();
     buildCaisseSelects();
     renderArticlesPage();
     renderHistorique();
     if(currentUser.role==='admin'){renderAccesPage();}
-  },300);
+  },200);
 }
+
+async function syncFromFirebase(){
+  // Sync silencieuse en arrière-plan
+  try{
+    const [fbUsers,fbArts,fbCats,fbTx,fbLogs]=await Promise.all([
+      fbGetAll('pos_users'),fbGetAll('pos_articles'),fbGetAll('pos_categories'),
+      fbGetAll('pos_transactions'),fbGetAll('pos_connlog')
+    ]);
+    if(fbUsers.length>0){saveLocalUsers(fbUsers);users=fbUsers;}
+    if(fbArts.length>0){saveLocalData('cf_articles',fbArts);articles=fbArts;buildCaisseSelects();renderArticlesPage();}
+    if(fbCats.length>0){saveLocalData('cf_categories',fbCats);categories=fbCats;}
+    if(fbTx.length>0){saveLocalData('cf_transactions',fbTx);transactions=fbTx.sort((a,b)=>new Date(b.date)-new Date(a.date));}
+    if(fbLogs.length>0){saveLocalData('cf_connlog',fbLogs);connLog=fbLogs;}
+  }catch(e){console.warn('Sync Firebase silencieux échoué:',e);}
+}
+
 
 // ─────────────────────────────────────────────────────────
 //  TABS
@@ -1120,8 +1141,9 @@ async function processPaiement(){
     note:document.getElementById('caisse-note').value||'',
     caissier:currentUser.username
   };
-  await fbSave('pos_transactions',tx.id,tx);
   transactions.unshift(tx);
+  saveLocalData('cf_transactions',transactions);
+  fbSave('pos_transactions',tx.id,tx); // non-bloquant
   lastTransactionId=tx.id;
   // Confirmation
   document.getElementById('confirm-detail').textContent=`Reçu ${receiptNum} • ${fmtEur(total)} • ${currentMode==='especes'?'Espèces':'Carte'}`;
@@ -1163,8 +1185,10 @@ async function saveArticle(){
     if(existing){catId=existing.id;}
     else{
       const newCat={id:genId(),name:newCatName};
-      await fbSave('pos_categories',newCat.id,newCat);
-      categories.push(newCat);catId=newCat.id;
+      categories.push(newCat);
+      saveLocalData('cf_categories',categories);
+      fbSave('pos_categories',newCat.id,newCat); // non-bloquant
+      catId=newCat.id;
     }
   }
   if(!catId){toast('Sélectionnez une catégorie','error');return;}
@@ -1172,16 +1196,18 @@ async function saveArticle(){
     const idx=articles.findIndex(a=>a.id===editingArticleId);
     if(idx>=0){
       articles[idx]={...articles[idx],name,price,catId,code};
-      await fbSave('pos_articles',editingArticleId,articles[idx]);
-      toast('Article modifié','success');
+      fbSave('pos_articles',editingArticleId,articles[idx]); // non-bloquant
+      saveLocalData('cf_articles',articles);
+      toast('Article modifié ✅','success');
     }
     editingArticleId=null;
     document.getElementById('cancel-edit-btn').style.display='none';
   } else {
     const art={id:genId(),name,price,catId,code,created:new Date().toISOString()};
-    await fbSave('pos_articles',art.id,art);
     articles.push(art);
-    toast('Article ajouté','success');
+    saveLocalData('cf_articles',articles);
+    fbSave('pos_articles',art.id,art); // non-bloquant
+    toast('Article ajouté ✅','success');
   }
   // Reset form
   document.getElementById('form-cat-select').value='';
@@ -1219,8 +1245,9 @@ function editArticle(id){
 
 async function deleteArticle(id){
   if(!confirm('Supprimer cet article ?'))return;
-  await fbDelete('pos_articles',id);
   articles=articles.filter(a=>a.id!==id);
+  saveLocalData('cf_articles',articles);
+  fbDelete('pos_articles',id); // non-bloquant
   renderArticlesPage();buildCaisseSelects();
   toast('Article supprimé','info');
 }
@@ -1228,10 +1255,12 @@ async function deleteArticle(id){
 async function deleteCategory(id){
   if(!confirm('Supprimer cette catégorie et tous ses articles ?'))return;
   const artIds=articles.filter(a=>a.catId===id).map(a=>a.id);
-  for(const aid of artIds){await fbDelete('pos_articles',aid);}
   articles=articles.filter(a=>a.catId!==id);
-  await fbDelete('pos_categories',id);
+  saveLocalData('cf_articles',articles);
+  artIds.forEach(aid=>fbDelete('pos_articles',aid));
   categories=categories.filter(c=>c.id!==id);
+  saveLocalData('cf_categories',categories);
+  fbDelete('pos_categories',id);
   renderArticlesPage();buildCaisseSelects();
   toast('Catégorie supprimée','info');
 }
@@ -1510,16 +1539,20 @@ async function addUser(){
     if(idx>=0){
       const updated={...users[idx],fullname:fullname||users[idx].fullname,email:email||users[idx].email,role};
       if(pass&&pass.length>=6)updated.pass=pass;
-      await fbSave('pos_users',editingUserId,updated);
-      users[idx]=updated;toast('Utilisateur modifié','success');
+      users[idx]=updated;
+      saveLocalUsers(users);
+      fbSave('pos_users',editingUserId,updated); // non-bloquant
+      toast('Utilisateur modifié','success');
     }
     cancelUserEdit();
   } else {
     const existing=users.find(u=>u.username===username);
     if(existing){err.textContent='Ce nom d\'utilisateur est déjà pris.';err.style.display='block';return;}
     const nu={id:genId(),username,pass,fullname:fullname||username,email,role,created:new Date().toISOString()};
-    await fbSave('pos_users',nu.id,nu);
-    users.push(nu);toast('Utilisateur créé','success');
+    users.push(nu);
+    saveLocalUsers(users);
+    fbSave('pos_users',nu.id,nu); // non-bloquant
+    toast('Utilisateur créé','success');
   }
   document.getElementById('new-username').value='';document.getElementById('new-pass').value='';
   document.getElementById('new-fullname').value='';document.getElementById('new-email').value='';
@@ -1554,8 +1587,9 @@ async function deleteUser(id){
   const u=users.find(x=>x.id===id);
   if(!u)return;
   if(!confirm(`Supprimer l'utilisateur @${u.username} ?`))return;
-  await fbDelete('pos_users',id);
   users=users.filter(x=>x.id!==id);
+  saveLocalUsers(users);
+  fbDelete('pos_users',id); // non-bloquant
   renderUsersTable();
   toast('Utilisateur supprimé','info');
 }
@@ -1564,22 +1598,14 @@ async function deleteUser(id){
 //  INIT
 // ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', ()=>{
+  ensureDefaultAdmin();
   document.getElementById('loading-screen').style.display='flex';
   document.getElementById('login-page').style.display='none';
-  document.addEventListener('firebase-ready', tryAutoLogin, {once:true});
-  if(window.fbReady!==undefined) tryAutoLogin();
-  // Fermer modals en cliquant outside
+  tryAutoLogin();
   document.querySelectorAll('.modal-overlay').forEach(m=>{
     m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
   });
 });
-if(document.readyState==='complete'||document.readyState==='interactive'){
-  if(window.db){
-    document.getElementById('loading-screen').style.display='flex';
-    document.getElementById('login-page').style.display='none';
-    tryAutoLogin();
-  }
-}
 </script>
 </body>
 </html>

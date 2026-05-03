@@ -884,24 +884,38 @@ function completeProgress(){
 //  LAUNCH
 // ─────────────────────────────────────────────────────────
 async function launchApp(){
-  showLoading(true);animateProgress();
+  showLoading(true); animateProgress();
   document.getElementById('login-page').style.display='none';
-  // Charger données
-  const [fbUsers,fbArts,fbCats,fbTx,fbLogs]=await Promise.all([
-    fbGetAll('pos_users'),fbGetAll('pos_articles'),fbGetAll('pos_categories'),
-    fbGetAll('pos_transactions'),fbGetAll('pos_connlog')
-  ]);
-  users=fbUsers;
-  articles=fbArts;
-  categories=fbCats;
-  transactions=fbTx.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  connLog=fbLogs.sort((a,b)=>new Date(b.loginTime)-new Date(a.loginTime));
+
+  // Timeout de 8s par requête Firebase — jamais bloqué
+  function fbSafe(col){
+    return Promise.race([
+      fbGetAll(col),
+      new Promise(res=>setTimeout(()=>res([]),8000))
+    ]);
+  }
+
+  try{
+    const [fbUsers,fbArts,fbCats,fbTx,fbLogs] = await Promise.all([
+      fbSafe('pos_users'), fbSafe('pos_articles'), fbSafe('pos_categories'),
+      fbSafe('pos_transactions'), fbSafe('pos_connlog')
+    ]);
+    users    = fbUsers;
+    articles = fbArts;
+    categories = fbCats;
+    transactions = fbTx.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    connLog  = fbLogs.sort((a,b)=>new Date(b.loginTime)-new Date(a.loginTime));
+  }catch(e){
+    console.error('launchApp data load error:',e);
+    // On continue avec des tableaux vides — l'app s'ouvre quand même
+    users=[]; articles=[]; categories=[]; transactions=[]; connLog=[];
+  }
+
   completeProgress();
   setTimeout(()=>{
     showLoading(false);
     document.getElementById('app').style.display='block';
     document.getElementById('tb-username').textContent=currentUser.fullname||currentUser.username;
-    // Afficher/masquer onglet accès
     if(currentUser.role!=='admin'){
       document.getElementById('tab-btn-acces').style.display='none';
     }

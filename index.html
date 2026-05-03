@@ -777,19 +777,39 @@ async function doLogin(){
   err.style.display='none';
   if(!u||!p){err.textContent='Remplissez les deux champs.';err.style.display='block';return;}
   btn.textContent='Connexion...';btn.disabled=true;
-  await ensureDefaultAdmin();
-  const fbUsers=await fbGetAll('pos_users');
-  const found=fbUsers.find(x=>x.username===u&&x.pass===p);
-  if(!found){
-    err.textContent='❌ Identifiants incorrects.';err.style.display='block';
-    btn.textContent='Se connecter →';btn.disabled=false;return;
+
+  const safetyTimer=setTimeout(()=>{
+    btn.textContent='Se connecter →';btn.disabled=false;
+    err.textContent='⚠️ Délai dépassé. Vérifiez votre connexion ou les règles Firestore.';err.style.display='block';
+  },10000);
+
+  try{
+    await ensureDefaultAdmin();
+    const fbUsers=await fbGetAll('pos_users');
+    const allUsers=fbUsers.length>0?fbUsers:[{id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'}];
+    const found=allUsers.find(x=>x.username===u&&x.pass===p);
+    clearTimeout(safetyTimer);
+    if(!found){
+      err.textContent='❌ Identifiants incorrects.';err.style.display='block';
+      btn.textContent='Se connecter →';btn.disabled=false;return;
+    }
+    const logId='log_'+Date.now();
+    fbSave('pos_connlog',logId,{id:logId,username:u,loginTime:new Date().toISOString(),logoutTime:null,sessionId:'s'+Date.now()}).catch(()=>{});
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:u,pass:p,logId}));
+    currentUser=found;
+    launchApp();
+  }catch(e){
+    clearTimeout(safetyTimer);
+    console.error('Login error:',e);
+    if(u==='admin'&&p==='admin123'){
+      sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:u,pass:p,logId:'local'}));
+      currentUser={id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'};
+      launchApp();
+    } else {
+      err.textContent='❌ Erreur Firebase. Réessayez ou vérifiez les règles Firestore.';err.style.display='block';
+      btn.textContent='Se connecter →';btn.disabled=false;
+    }
   }
-  // Log connexion
-  const logId='log_'+Date.now();
-  await fbSave('pos_connlog',logId,{id:logId,username:u,loginTime:new Date().toISOString(),logoutTime:null,sessionId:'s'+Date.now()});
-  sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:u,pass:p,logId}));
-  currentUser=found;
-  launchApp();
 }
 
 async function tryAutoLogin(){
@@ -797,26 +817,38 @@ async function tryAutoLogin(){
   if(!sess){showLoading(false);document.getElementById('login-page').style.display='flex';return;}
   showLoading(true);
   animateProgress();
-  await ensureDefaultAdmin();
-  const fbUsers=await fbGetAll('pos_users');
-  const found=fbUsers.find(x=>x.username===sess.username&&x.pass===sess.pass);
-  if(!found){
-    sessionStorage.removeItem(SESSION_KEY);
-    showLoading(false);document.getElementById('login-page').style.display='flex';return;
+  try{
+    await ensureDefaultAdmin();
+    const fbUsers=await fbGetAll('pos_users');
+    const allUsers=fbUsers.length>0?fbUsers:[{id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'}];
+    const found=allUsers.find(x=>x.username===sess.username&&x.pass===sess.pass);
+    if(!found){
+      sessionStorage.removeItem(SESSION_KEY);
+      showLoading(false);document.getElementById('login-page').style.display='flex';return;
+    }
+    currentUser=found;
+    launchApp();
+  }catch(e){
+    console.error('AutoLogin error:',e);
+    // Fallback: si c'est admin, on laisse passer
+    if(sess.username==='admin'&&sess.pass==='admin123'){
+      currentUser={id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin'};
+      launchApp();
+    } else {
+      sessionStorage.removeItem(SESSION_KEY);
+      showLoading(false);document.getElementById('login-page').style.display='flex';
+    }
   }
-  currentUser=found;
-  launchApp();
 }
-
 async function ensureDefaultAdmin(){
   try{
-    const fbUsers=await fbGetAll('pos_users');
+    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000));
+    const fbUsers=await Promise.race([fbGetAll('pos_users'),timeout]);
     if(!fbUsers.find(x=>x.username==='admin')){
       await fbSave('pos_users','u0',{id:'u0',username:'admin',pass:'admin123',fullname:'Administrateur',email:'',role:'admin',created:new Date().toISOString()});
     }
-  }catch(e){}
+  }catch(e){console.warn('ensureDefaultAdmin:',e);}
 }
-
 function doLogout(){
   const sess=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
   if(sess?.logId) fbSave('pos_connlog',sess.logId,{id:sess.logId,username:currentUser?.username||'',loginTime:'',logoutTime:new Date().toISOString()}).catch(()=>{});

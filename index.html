@@ -300,7 +300,7 @@ label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-trans
 <body>
 
 <!-- ═══════════ LOGIN PAGE ═══════════ -->
-<div id="login-page">
+<div id="login-page" style="display:flex;">
   <div class="login-bg-glow"></div>
   <div class="login-dots"></div>
   <div class="login-card">
@@ -335,7 +335,7 @@ label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-trans
 </div>
 
 <!-- ═══════════ APP ═══════════ -->
-<div id="app">
+<div id="app" style="display:none;">
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-brand">
@@ -841,13 +841,12 @@ async function doLogin(){
 
 async function tryAutoLogin(){
   const sess=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
-  if(!sess){showLoading(false);document.getElementById('login-page').style.display='flex';return;}
+  if(!sess){ showLogin(); return; }
   // Vérif instantanée depuis cache local
   const localUsers=getLocalUsers();
   const found=localUsers.find(x=>x.username===sess.username&&x.pass===sess.pass);
   if(found){currentUser=found;launchApp(true);return;}
-  showLoading(false);
-  document.getElementById('login-page').style.display='flex';
+  showLogin();
 }
 
 async function ensureDefaultAdmin(){
@@ -918,12 +917,51 @@ async function launchApp(skipFbLoad){
   }
 }
 
+function showLogin(){
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+}
+function showLoading(show){
+  document.getElementById('loading-screen').style.display=show?'flex':'none';
+}
+function animateProgress(){
+  let w=0;
+  const bar=document.getElementById('ls-bar');
+  const iv=setInterval(()=>{
+    w+=Math.random()*18;
+    if(w>85){clearInterval(iv);}
+    bar.style.width=Math.min(w,85)+'%';
+  },150);
+}
+function completeProgress(){
+  document.getElementById('ls-bar').style.width='100%';
+}
+function doLogout(){
+  try{
+    const sess=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+    if(sess?.logId) fbSave('pos_connlog',sess.logId,{id:sess.logId,username:currentUser?.username||'',loginTime:'',logoutTime:new Date().toISOString()});
+    sessionStorage.removeItem(SESSION_KEY);
+  }catch(e){}
+  currentUser=null;
+  panier=[];
+  document.getElementById('app').style.display='none';
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+  try{document.getElementById('inp-user').value='';}catch(e){}
+  try{document.getElementById('inp-pass').value='';}catch(e){}
+  try{document.getElementById('btn-login').textContent='Se connecter →';document.getElementById('btn-login').disabled=false;}catch(e){}
+  try{document.getElementById('login-err').style.display='none';}catch(e){}
+}
+
 function renderApp(){
   setTimeout(()=>{
-    showLoading(false);
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('loading-screen').style.display='none';
     document.getElementById('app').style.display='block';
     document.getElementById('tb-username').textContent=currentUser.fullname||currentUser.username;
     if(currentUser.role!=='admin'){document.getElementById('tab-btn-acces').style.display='none';}
+    else{document.getElementById('tab-btn-acces').style.display='';}
     updateCaisseDate();
     buildCaisseSelects();
     renderArticlesPage();

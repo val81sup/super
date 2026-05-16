@@ -295,6 +295,133 @@ label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-trans
 .receipt-paper .r-total-row.grand{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;border-top:2px solid #111;margin-top:8px;padding-top:10px;}
 .receipt-paper .r-footer{text-align:center;font-size:11px;color:#aaa;margin-top:16px;}
 .receipt-paper .r-mode{display:inline-block;background:#e0f2fe;color:#0284c7;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;margin-bottom:2px;}
+
+/* ── PAGE RECHERCHE ── */
+/* ──────────────────────────────────────────────
+   PAGE RECHERCHE (refonte)
+────────────────────────────────────────────── */
+#tab-recherche{padding:0;background:var(--bg);}
+.rech-hero{padding:32px 32px 0;background:linear-gradient(160deg,rgba(14,165,233,.08) 0%,rgba(245,158,11,.04) 100%);border-bottom:1px solid var(--border);}
+.rech-hero-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.rech-hero-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:4px;}
+.rech-hero-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.rech-search-wrap{position:relative;max-width:640px;}
+.rech-search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;opacity:.5;}
+.rech-search-input{width:100%;padding:15px 50px 15px 50px;font-size:15px;border-radius:16px;border:2px solid var(--border2);background:var(--surface);color:var(--text);transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif;}
+.rech-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(14,165,233,.12);outline:none;}
+.rech-search-clear{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.rech-search-clear:hover{color:var(--text);border-color:var(--accent);}
+.rech-chips-bar{display:flex;gap:7px;flex-wrap:wrap;padding:16px 0 20px;}
+.rech-chip{padding:6px 15px;border-radius:99px;border:1.5px solid var(--border2);background:transparent;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted2);transition:all .18s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.rech-chip:hover{border-color:var(--accent);color:var(--accent);}
+.rech-chip.active{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 3px 12px rgba(14,165,233,.35);}
+.rech-body{padding:24px 32px 40px;}
+.rech-sep{display:flex;align-items:center;gap:12px;margin:22px 0 14px;}
+.rech-sep-label{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.rech-sep-line{flex:1;height:1px;background:var(--border);}
+.rech-cat-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:default;}
+.rech-cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.rech-cat-name-lbl{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;flex:1;}
+.rech-cat-count-badge{font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:2px 8px;font-weight:700;}
+.rech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:6px;}
+.rech-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:0;overflow:hidden;transition:all .18s;cursor:default;display:flex;flex-direction:column;}
+.rech-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.28);}
+.rech-card-top{height:4px;width:100%;flex-shrink:0;}
+.rech-card-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;gap:6px;}
+.rech-cat-badge-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block;align-self:flex-start;letter-spacing:.3px;}
+.rech-card-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;line-height:1.35;}
+.rech-card-code{font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.rech-card-price{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--accent);margin-top:auto;padding-top:8px;}
+.rech-empty{text-align:center;padding:72px 20px;color:var(--muted);}
+.rech-empty-icon{font-size:52px;opacity:.25;margin-bottom:14px;}
+.rech-empty-text{font-size:14px;font-weight:600;}
+.rech-empty-sub{font-size:12px;margin-top:6px;color:var(--muted2);}
+
+/* ──────────────────────────────────────────────
+   PAGE ARDOISE
+────────────────────────────────────────────── */
+#tab-ardoise{padding:0;background:var(--bg);}
+.ard-layout{display:grid;grid-template-columns:1fr 400px;min-height:calc(100vh - var(--topbar-h) - var(--tabbar-h));}
+@media(max-width:1080px){.ard-layout{grid-template-columns:1fr;}}
+.ard-left{padding:24px 28px 40px;overflow-y:auto;}
+.ard-right{background:var(--surface);border-left:1px solid var(--border);padding:24px;display:flex;flex-direction:column;gap:16px;position:sticky;top:calc(var(--topbar-h)+var(--tabbar-h));height:calc(100vh - var(--topbar-h) - var(--tabbar-h));overflow-y:auto;}
+
+/* Header ardoise */
+.ard-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.ard-title-wrap{}
+.ard-title-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+.ard-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.ard-new-client-btn{padding:10px 20px;border-radius:99px;border:1.5px dashed var(--green);background:rgba(16,185,129,.06);font-size:13px;font-weight:700;cursor:pointer;color:var(--green2);transition:all .2s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:7px;}
+.ard-new-client-btn:hover{background:rgba(16,185,129,.14);border-style:solid;}
+
+/* Clients chips */
+.ard-section-lbl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;}
+.ard-clients-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;min-height:46px;}
+.ard-client-btn{padding:9px 16px;border-radius:12px;border:1.5px solid var(--border2);background:var(--surface2);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted2);transition:all .18s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px;}
+.ard-client-btn:hover{border-color:var(--accent);color:var(--accent);}
+.ard-client-btn.active{background:rgba(14,165,233,.1);border-color:var(--accent);color:var(--accent2);box-shadow:0 2px 10px rgba(14,165,233,.2);}
+.ard-client-badge{background:var(--accent);color:#fff;border-radius:99px;font-size:10px;font-weight:800;padding:1px 7px;min-width:18px;text-align:center;line-height:1.6;}
+.ard-client-badge.zero{background:var(--border2);color:var(--muted);}
+.ard-client-total-chip{font-size:11px;font-weight:700;color:var(--accent2);background:rgba(14,165,233,.1);border-radius:6px;padding:1px 6px;}
+
+/* Panneau ajout article */
+.ard-add-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:24px;}
+.ard-add-card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.ard-add-grid{display:grid;grid-template-columns:1fr 1fr 80px auto;gap:10px;align-items:end;}
+@media(max-width:700px){.ard-add-grid{grid-template-columns:1fr 1fr;}}
+
+/* Liste articles ardoise */
+.ard-items{display:flex;flex-direction:column;gap:8px;}
+.ard-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;transition:all .18s;}
+.ard-item:hover{border-color:var(--border2);}
+.ard-item-color-bar{width:3px;height:36px;border-radius:99px;flex-shrink:0;}
+.ard-item-cat{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;}
+.ard-item-info{flex:1;min-width:0;}
+.ard-item-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ard-item-unit{font-size:11px;color:var(--muted2);margin-top:2px;}
+.ard-qty-ctrl{display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:3px 6px;}
+.ard-qty-btn{width:28px;height:28px;border:none;background:transparent;color:var(--muted2);cursor:pointer;border-radius:7px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;}
+.ard-qty-btn:hover{background:var(--surface3);color:var(--accent2);}
+.ard-qty-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;min-width:24px;text-align:center;}
+.ard-item-total{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--accent);white-space:nowrap;min-width:68px;text-align:right;}
+.ard-item-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:6px;border-radius:7px;transition:all .15s;flex-shrink:0;}
+.ard-item-del:hover{color:#ef4444;background:rgba(239,68,68,.1);}
+.ard-empty-items{text-align:center;padding:42px 20px;color:var(--muted);border:1.5px dashed var(--border2);border-radius:14px;font-size:13px;line-height:1.7;}
+
+/* Panneau droit récapitulatif */
+.ard-right-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:space-between;}
+.ard-client-name-display{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;padding:14px 16px;background:linear-gradient(135deg,rgba(14,165,233,.08),rgba(14,165,233,.02));border:1px solid rgba(14,165,233,.2);border-radius:12px;}
+.ard-client-name-icon{font-size:20px;}
+.ard-summary-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;flex:1;overflow-y:auto;min-height:0;}
+.ard-summary-items{display:flex;flex-direction:column;gap:5px;}
+.ard-summary-item{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:6px 8px;border-radius:8px;transition:background .1s;}
+.ard-summary-item:hover{background:var(--surface3);}
+.ard-summary-item-name{color:var(--muted2);flex:1;}
+.ard-summary-item-qty{font-size:11px;color:var(--muted);margin:0 8px;background:var(--surface3);padding:1px 7px;border-radius:5px;}
+.ard-summary-item-price{font-weight:700;color:var(--text);font-family:'Syne',sans-serif;}
+.ard-divider{height:1px;background:var(--border);margin:10px 0;}
+.ard-total-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;}
+.ard-total-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:700;}
+.ard-total-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);}
+.ard-no-client-msg{text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;line-height:1.7;}
+
+/* Boutons paiement ardoise */
+.ard-mode-row{display:flex;gap:8px;}
+.ard-mode-btn{flex:1;padding:9px 0;border-radius:10px;border:1.5px solid var(--border2);background:var(--surface2);font-size:12px;font-weight:700;cursor:pointer;color:var(--muted2);transition:all .18s;font-family:'DM Sans',sans-serif;}
+.ard-mode-btn.active{border-color:var(--accent);background:rgba(14,165,233,.1);color:var(--accent2);}
+.ard-pay-btn{width:100%;padding:15px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;border-radius:14px;letter-spacing:.3px;background:linear-gradient(135deg,var(--accent),#0284c7);color:#fff;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(14,165,233,.35);}
+.ard-pay-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(14,165,233,.45);}
+.ard-pay-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.ard-del-client-btn{width:100%;padding:9px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:#ef4444;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.ard-del-client-btn:hover{background:rgba(239,68,68,.14);}
+
+/* Modal nouveau client */
+.ard-name-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);z-index:9998;display:none;align-items:center;justify-content:center;}
+.ard-name-modal-bg.open{display:flex;}
+.ard-name-modal{background:var(--surface);border:1px solid var(--border2);border-radius:22px;padding:32px;width:400px;max-width:95vw;animation:cardIn .25s ease;}
+.ard-name-modal h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;}
+.ard-name-modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+
 </style>
 </head>
 <body>
@@ -351,6 +478,8 @@ label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-trans
   <div class="tabbar">
     <button class="tab-btn active" data-tab="caisse" onclick="showTab('caisse',this)">🏧 Caisse</button>
     <button class="tab-btn" data-tab="articles" onclick="showTab('articles',this)">📦 Articles</button>
+    <button class="tab-btn" data-tab="recherche" onclick="showTab('recherche',this)">🔍 Recherche</button>
+    <button class="tab-btn" data-tab="ardoise" onclick="showTab('ardoise',this)">🍺 Ardoise</button>
     <button class="tab-btn" data-tab="historique" onclick="showTab('historique',this)">📋 Historique</button>
     <button class="tab-btn" id="tab-btn-acces" data-tab="acces" onclick="showTab('acces',this)">🔑 Accès</button>
   </div>
@@ -405,7 +534,6 @@ label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-trans
           <!-- Totaux -->
           <div class="panier-totals">
             <div class="total-row"><span class="lbl">Sous-total</span><span id="sous-total">0,00 €</span></div>
-            <div class="total-row"><span class="lbl">TVA (20%)</span><span id="tva-total">0,00 €</span></div>
             <div class="total-row grand"><span>Total TTC</span><span id="grand-total">0,00 €</span></div>
           </div>
         </div>
@@ -534,6 +662,143 @@ label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-trans
             <div style="font-size:13px;">Ajoutez votre premier article via le formulaire</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB RECHERCHE
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-recherche">
+    <div class="rech-hero">
+      <div class="rech-hero-eyebrow">CaisseFlow</div>
+      <div class="rech-hero-title">Recherche de produits</div>
+      <div class="rech-hero-sub">Entrez un nom d'article ou une catégorie pour trouver instantanément</div>
+      <div class="rech-search-wrap">
+        <span class="rech-search-icon">🔍</span>
+        <input class="rech-search-input" type="text" id="rech-input" placeholder="Ex : Coca-Cola, Boissons, ART-001..." oninput="doRecherche()" autocomplete="off">
+        <div class="rech-search-clear" onclick="document.getElementById('rech-input').value='';doRecherche();" title="Effacer">✕</div>
+      </div>
+      <div class="rech-chips-bar" id="rech-cat-chips"></div>
+    </div>
+    <div class="rech-body" id="rech-results">
+      <div class="rech-empty">
+        <div class="rech-empty-icon">🔍</div>
+        <div class="rech-empty-text">Commencez à taper pour rechercher</div>
+        <div class="rech-empty-sub">Nom d'article, catégorie ou code article</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB ARDOISE
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-ardoise">
+    <div class="ard-layout">
+
+      <!-- ── GAUCHE ── -->
+      <div class="ard-left">
+        <!-- Header -->
+        <div class="ard-header">
+          <div class="ard-title-wrap">
+            <div class="ard-title-eyebrow">CaisseFlow</div>
+            <div class="ard-title">🍺 Ardoise</div>
+          </div>
+          <button class="ard-new-client-btn" onclick="ardNewClient()">＋ Nouveau client</button>
+        </div>
+
+        <!-- Clients ouverts -->
+        <div class="ard-section-lbl">Clients ouverts</div>
+        <div class="ard-clients-wrap" id="ard-clients-wrap">
+          <div style="color:var(--muted);font-size:13px;padding:10px 0;">Aucun client — cliquez sur "+ Nouveau client"</div>
+        </div>
+
+        <!-- Ajouter un article -->
+        <div class="ard-add-card">
+          <div class="ard-add-card-title">➕ Ajouter une consommation</div>
+          <div class="ard-add-grid">
+            <div class="field" style="margin:0;">
+              <label>Catégorie</label>
+              <select id="ard-sel-cat" onchange="ardUpdateArticles()">
+                <option value="">— Toutes —</option>
+              </select>
+            </div>
+            <div class="field" style="margin:0;">
+              <label>Article</label>
+              <select id="ard-sel-art">
+                <option value="">— Choisir —</option>
+              </select>
+            </div>
+            <div class="field" style="margin:0;">
+              <label>Qté</label>
+              <input type="number" id="ard-qty" value="1" min="1" style="text-align:center;">
+            </div>
+            <button class="btn btn-primary" onclick="ardAddItem()" style="white-space:nowrap;align-self:flex-end;padding:10px 16px;">＋ Ajouter</button>
+          </div>
+        </div>
+
+        <!-- Liste consommations -->
+        <div class="ard-section-lbl">Consommations du client sélectionné</div>
+        <div class="ard-items" id="ard-items-list">
+          <div class="ard-empty-items">👆 Sélectionnez ou créez un client<br>pour démarrer une ardoise</div>
+        </div>
+      </div>
+
+      <!-- ── DROITE : récapitulatif ── -->
+      <div class="ard-right">
+        <div class="ard-right-title">
+          Récapitulatif
+          <span style="font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400;" id="ard-nb-clients-lbl"></span>
+        </div>
+
+        <!-- Nom client actif -->
+        <div id="ard-client-display" style="display:none;" class="ard-client-name-display">
+          <span class="ard-client-name-icon">👤</span>
+          <span id="ard-client-display-name">—</span>
+        </div>
+
+        <!-- Liste articles résumé -->
+        <div class="ard-summary-card" id="ard-summary">
+          <div class="ard-no-client-msg">👆 Sélectionnez un client<br>pour voir le récapitulatif</div>
+        </div>
+
+        <!-- Total -->
+        <div id="ard-total-wrap" style="display:none;">
+          <div class="ard-divider"></div>
+          <div class="ard-total-row">
+            <span class="ard-total-lbl">Total à payer</span>
+            <span class="ard-total-val" id="ard-total-display">0,00 €</span>
+          </div>
+        </div>
+
+        <!-- Mode de paiement -->
+        <div id="ard-pay-section" style="display:none;">
+          <div class="ard-section-lbl" style="margin-bottom:8px;">Mode de paiement</div>
+          <div class="ard-mode-row">
+            <button class="ard-mode-btn active" id="ard-mode-especes" onclick="ardSetMode('especes')">💵 Espèces</button>
+            <button class="ard-mode-btn" id="ard-mode-carte" onclick="ardSetMode('carte')">💳 Carte</button>
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <button class="ard-pay-btn" id="ard-pay-btn" onclick="ardPay()" disabled>✅ Encaisser et clôturer</button>
+        <button class="ard-del-client-btn" id="ard-del-btn" onclick="ardDeleteClient()" style="display:none;">🗑 Supprimer ce client</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal nouveau client -->
+  <div class="ard-name-modal-bg" id="ard-name-modal">
+    <div class="ard-name-modal">
+      <h3>Nouveau client</h3>
+      <div class="ard-name-modal-sub">Entrez un prénom, un pseudo ou un numéro de table</div>
+      <div class="field">
+        <label>Identifiant client</label>
+        <input type="text" id="ard-client-name-inp" placeholder="Ex : Table 3, Jean, Bar 1..." onkeydown="if(event.key==='Enter')ardConfirmClient()">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="btn btn-primary" style="flex:1;padding:12px;" onclick="ardConfirmClient()">Créer l'ardoise</button>
+        <button class="btn btn-outline" style="padding:12px 18px;" onclick="ardCloseModal()">Annuler</button>
       </div>
     </div>
   </div>
@@ -840,13 +1105,17 @@ async function doLogin(){
 }
 
 async function tryAutoLogin(){
-  const sess=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
-  if(!sess){ showLogin(); return; }
-  // Vérif instantanée depuis cache local
-  const localUsers=getLocalUsers();
-  const found=localUsers.find(x=>x.username===sess.username&&x.pass===sess.pass);
-  if(found){currentUser=found;launchApp(true);return;}
-  showLogin();
+  try{
+    const sess=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+    if(!sess){ showLogin(); return; }
+    const localUsers=getLocalUsers();
+    const found=localUsers.find(x=>x.username===sess.username&&x.pass===sess.pass);
+    if(found){ currentUser=found; launchApp(true); return; }
+    showLogin();
+  }catch(e){
+    console.error('tryAutoLogin error:',e);
+    showLogin();
+  }
 }
 
 async function ensureDefaultAdmin(){
@@ -993,9 +1262,11 @@ function showTab(id,btn){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  if(btn)btn.classList.add('active');
+  btn.classList.add('active');
+  if(id==='recherche'){initRechercheChips();doRecherche();}
   if(id==='historique'){renderHistorique();}
-  if(id==='acces'&&currentUser.role==='admin'){renderAccesPage();}
+  if(id==='acces'&&currentUser&&currentUser.role==='admin'){renderAccesPage();}
+  if(id==='ardoise'){ardBuildSelects();ardRenderClients();ardRenderItems();ardRenderSummary();}
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1034,10 +1305,9 @@ setInterval(updateCaisseDate,30000);
 
 function buildCaisseSelects(){
   const catSel=document.getElementById('sel-cat');
+  const sortedCats=[...categories].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
   catSel.innerHTML='<option value="">— Choisir une catégorie —</option>';
-  categories.forEach(c=>{
-    catSel.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
-  });
+  sortedCats.forEach(c=>{catSel.innerHTML+=`<option value="${c.id}">${c.name}</option>`;});
   updateArticleSelect();
 }
 
@@ -1046,7 +1316,8 @@ function updateArticleSelect(){
   const artSel=document.getElementById('sel-article');
   artSel.innerHTML='<option value="">— Article —</option>';
   const filtered=catId?articles.filter(a=>a.catId===catId):articles;
-  filtered.forEach(a=>{
+  const sorted=[...filtered].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  sorted.forEach(a=>{
     const cat=categories.find(c=>c.id===a.catId);
     artSel.innerHTML+=`<option value="${a.id}" data-price="${a.price}" data-name="${a.name}" data-cat="${cat?cat.name:''}">${a.name} — ${fmtEur(a.price)}</option>`;
   });
@@ -1109,12 +1380,9 @@ function clearPanier(){if(!panier.length)return;panier=[];renderPanier();documen
 
 function updateTotals(){
   const subtotal=panier.reduce((s,p)=>s+p.subtotal,0);
-  const tva=subtotal*0.20;
-  const total=subtotal+tva;
   document.getElementById('sous-total').textContent=fmtEur(subtotal);
-  document.getElementById('tva-total').textContent=fmtEur(tva);
-  document.getElementById('grand-total').textContent=fmtEur(total);
-  document.getElementById('paiement-total-display').textContent=fmtEur(total);
+  document.getElementById('grand-total').textContent=fmtEur(subtotal);
+  document.getElementById('paiement-total-display').textContent=fmtEur(subtotal);
   calcRendu();
 }
 
@@ -1162,8 +1430,8 @@ function setQuickExact(){
 async function processPaiement(){
   if(!panier.length){toast('Le panier est vide','error');return;}
   const subtotal=panier.reduce((s,p)=>s+p.subtotal,0);
-  const tva=subtotal*0.20;
-  const total=subtotal+tva;
+  const tva=0;
+  const total=subtotal;
   const recu=parseFloat(document.getElementById('montant-recu').value)||0;
   if(currentMode==='especes'&&recu<total){toast('Montant reçu insuffisant','error');return;}
   const rendu=currentMode==='especes'?recu-total:0;
@@ -1317,24 +1585,135 @@ function getCatColor(catId){
   return CAT_COLORS[idx%CAT_COLORS.length]||'#6b7280';
 }
 
+
+// ─────────────────────────────────────────────────────────
+//  RECHERCHE
+// ─────────────────────────────────────────────────────────
+let rechFilterCat='all';
+
+function initRechercheChips(){
+  const chips=document.getElementById('rech-cat-chips');
+  if(!chips)return;
+  const sorted=[...categories].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  let html='<button class="rech-chip '+(rechFilterCat==='all'?'active':'')+'" data-cat="all">Tous les articles</button>';
+  sorted.forEach(c=>{
+    const active=rechFilterCat===c.id?'active':'';
+    html+='<button class="rech-chip '+active+'" data-cat="'+c.id+'">'+c.name+'</button>';
+  });
+  chips.innerHTML=html;
+  chips.querySelectorAll('.rech-chip').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      rechFilterCat=this.dataset.cat;
+      chips.querySelectorAll('.rech-chip').forEach(b=>b.classList.remove('active'));
+      this.classList.add('active');
+      doRecherche();
+    });
+  });
+}
+
+function rechSetCat(btn,catId){
+  rechFilterCat=catId;
+  document.querySelectorAll('.rech-chip').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  doRecherche();
+}
+
+
+function doRecherche(){
+  const q=(document.getElementById('rech-input')?.value||'').trim().toLowerCase();
+  const res=document.getElementById('rech-results');
+  if(!res)return;
+  initRechercheChips();
+  let pool=rechFilterCat==='all'?articles:articles.filter(a=>a.catId===rechFilterCat);
+
+  if(!q){
+    // Afficher tout par catégorie
+    if(!pool.length){
+      res.innerHTML='<div class="rech-empty"><div class="rech-empty-icon">📦</div><div class="rech-empty-text">Aucun article disponible</div><div class="rech-empty-sub">Ajoutez des articles dans la page Articles</div></div>';
+      return;
+    }
+    const sortedCats=[...categories].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+    const cats=rechFilterCat==='all'?sortedCats:sortedCats.filter(c=>c.id===rechFilterCat);
+    let html='';
+    cats.forEach(cat=>{
+      const arts=[...pool.filter(a=>a.catId===cat.id)].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+      if(!arts.length)return;
+      const col=getCatColor(cat.id);
+      html+='<div class="rech-cat-header"><span class="rech-cat-dot" style="background:'+col+';"></span><span class="rech-cat-name-lbl">'+cat.name+'</span><span class="rech-cat-count-badge">'+arts.length+' article'+(arts.length>1?'s':'')+'</span></div>';
+      html+='<div class="rech-grid">';
+      arts.forEach(a=>{html+=rechCardHTML(a,cat,col);});
+      html+='</div>';
+    });
+    const noCat=pool.filter(a=>!categories.find(c=>c.id===a.catId)).sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+    if(noCat.length){
+      html+='<div class="rech-cat-header"><span class="rech-cat-dot" style="background:#6b7280;"></span><span class="rech-cat-name-lbl">Sans catégorie</span><span class="rech-cat-count-badge">'+noCat.length+'</span></div>';
+      html+='<div class="rech-grid">';
+      noCat.forEach(a=>{html+=rechCardHTML(a,null,'#6b7280');});
+      html+='</div>';
+    }
+    res.innerHTML=html||'<div class="rech-empty"><div class="rech-empty-icon">📦</div><div class="rech-empty-text">Aucun article</div></div>';
+    return;
+  }
+
+  // Recherche texte
+  const byName=[...pool.filter(a=>a.name.toLowerCase().includes(q)||(a.code&&a.code.toLowerCase().includes(q)))].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  const matchCats=categories.filter(c=>c.name.toLowerCase().includes(q));
+  const byCat=[...pool.filter(a=>matchCats.find(c=>c.id===a.catId)&&!byName.find(x=>x.id===a.id))].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+
+  if(!byName.length&&!byCat.length){
+    res.innerHTML='<div class="rech-empty"><div class="rech-empty-icon">🔍</div><div class="rech-empty-text">Aucun résultat</div><div class="rech-empty-sub">Aucun article ne correspond à "<strong>'+q+'</strong>"</div></div>';
+    return;
+  }
+
+  let html='';
+  if(byName.length){
+    html+='<div class="rech-sep"><span class="rech-sep-label">Articles ('+byName.length+')</span><span class="rech-sep-line"></span></div>';
+    html+='<div class="rech-grid">';
+    byName.forEach(a=>{const cat=categories.find(c=>c.id===a.catId);html+=rechCardHTML(a,cat,getCatColor(a.catId));});
+    html+='</div>';
+  }
+  if(byCat.length){
+    const catNames=[...new Set(byCat.map(a=>{const c=categories.find(x=>x.id===a.catId);return c?c.name:'?';}))].sort((a,b)=>a.localeCompare(b,'fr'));
+    html+='<div class="rech-sep"><span class="rech-sep-label">Catégorie "'+catNames.join(', ')+'" ('+byCat.length+')</span><span class="rech-sep-line"></span></div>';
+    html+='<div class="rech-grid">';
+    byCat.forEach(a=>{const cat=categories.find(c=>c.id===a.catId);html+=rechCardHTML(a,cat,getCatColor(a.catId));});
+    html+='</div>';
+  }
+  res.innerHTML=html;
+}
+
+function rechCardHTML(a,cat,col){
+  const bg=(col||'#6b7280')+'28';
+  const code=a.code?'<div class="rech-card-code">'+a.code+'</div>':'';
+  return '<div class="rech-card">'
+    +'<div class="rech-card-top" style="background:'+col+';"></div>'
+    +'<div class="rech-card-body">'
+    +'<span class="rech-cat-badge-pill" style="background:'+bg+';color:'+(col||'#6b7280')+';">'+(cat?cat.name:'—')+'</span>'
+    +'<div class="rech-card-name">'+a.name+'</div>'
+    +code
+    +'<div class="rech-card-price">'+fmtEur(a.price)+'</div>'
+    +'</div></div>';
+}
+
 function renderArticlesPage(){
   // Formulaire catégorie select
   const catSel=document.getElementById('form-cat-select');
+  const sortedCatsForm=[...categories].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
   catSel.innerHTML='<option value="">— Choisir —</option>';
-  categories.forEach(c=>{catSel.innerHTML+=`<option value="${c.id}">${c.name}</option>`;});
+  sortedCatsForm.forEach(c=>{catSel.innerHTML+=`<option value="${c.id}">${c.name}</option>`;});
   catSel.innerHTML+='<option value="__new__">+ Nouvelle catégorie...</option>';
   // Filtres catégorie
   const filterList=document.getElementById('cat-filter-list');
   filterList.innerHTML=`<button class="cat-filter ${activeFilterCat==='all'?'active':''}" data-cat="all" onclick="filterByCat('all',this)">Tous (${articles.length})</button>`;
-  categories.forEach(c=>{
+  sortedCatsForm.forEach(c=>{
     const count=articles.filter(a=>a.catId===c.id).length;
     filterList.innerHTML+=`<button class="cat-filter ${activeFilterCat===c.id?'active':''}" data-cat="${c.id}" onclick="filterByCat('${c.id}',this)">${c.name} (${count})</button>`;
   });
   // Gestion catégories
   const cml=document.getElementById('cats-manage-list');
-  if(!categories.length){cml.innerHTML=`<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">Aucune catégorie</div>`;
+  if(!sortedCatsForm.length){cml.innerHTML=`<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">Aucune catégorie</div>`;
   } else {
-    cml.innerHTML=categories.map(c=>`
+    cml.innerHTML=sortedCatsForm.map(c=>`
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
         <div style="width:10px;height:10px;border-radius:50%;background:${getCatColor(c.id)};flex-shrink:0;"></div>
         <span style="flex:1;font-size:13px;font-weight:600;">${c.name}</span>
@@ -1347,7 +1726,8 @@ function renderArticlesPage(){
 
 function renderArticlesGrid(){
   const grid=document.getElementById('articles-grid');
-  const filtered=activeFilterCat==='all'?articles:articles.filter(a=>a.catId===activeFilterCat);
+  const rawFiltered=activeFilterCat==='all'?articles:articles.filter(a=>a.catId===activeFilterCat);
+  const filtered=[...rawFiltered].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
   if(!filtered.length){
     grid.innerHTML=`<div class="articles-empty"><div class="articles-empty-icon">📦</div><div style="font-size:15px;font-weight:600;">${activeFilterCat==='all'?'Aucun article':'Aucun article dans cette catégorie'}</div><div style="font-size:13px;">Ajoutez votre premier article via le formulaire</div></div>`;
     return;
@@ -1635,14 +2015,271 @@ async function deleteUser(id){
 // ─────────────────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────
+//  ARDOISE
+// ─────────────────────────────────────────────────────────
+let ardClients={};
+let ardActiveId=null;
+let ardPayMode='especes';
+function ardGenId(){return 'c'+Date.now()+'_'+Math.random().toString(36).slice(2,6);}
+
+function ardSetMode(mode){
+  ardPayMode=mode;
+  document.getElementById('ard-mode-especes')?.classList.toggle('active',mode==='especes');
+  document.getElementById('ard-mode-carte')?.classList.toggle('active',mode==='carte');
+}
+
+function ardBuildSelects(){
+  const catSel=document.getElementById('ard-sel-cat');
+  if(!catSel)return;
+  const sorted=[...categories].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  catSel.innerHTML='<option value="">— Toutes les catégories —</option>';
+  sorted.forEach(c=>{catSel.innerHTML+='<option value="'+c.id+'">'+c.name+'</option>';});
+  ardUpdateArticles();
+}
+
+function ardUpdateArticles(){
+  const catId=document.getElementById('ard-sel-cat')?.value||'';
+  const artSel=document.getElementById('ard-sel-art');
+  if(!artSel)return;
+  const pool=catId?articles.filter(a=>a.catId===catId):articles;
+  const sorted=[...pool].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  artSel.innerHTML='<option value="">— Choisir un article —</option>';
+  sorted.forEach(a=>{
+    const cat=categories.find(c=>c.id===a.catId);
+    artSel.innerHTML+='<option value="'+a.id+'" data-price="'+a.price+'" data-name="'+a.name+'" data-cat="'+(cat?cat.name:'')+'">'
+      +a.name+' — '+fmtEur(a.price)+'</option>';
+  });
+}
+
+function ardRenderClients(){
+  const wrap=document.getElementById('ard-clients-wrap');
+  if(!wrap)return;
+  const ids=Object.keys(ardClients);
+  const lbl=document.getElementById('ard-nb-clients-lbl');
+  if(lbl)lbl.textContent=ids.length?ids.length+' client'+(ids.length>1?'s':'')+' ouvert'+(ids.length>1?'s':''):'';
+  if(!ids.length){
+    wrap.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0;">Aucun client ouvert</div>';
+    ardActiveId=null;ardRenderItems();ardRenderSummary();return;
+  }
+  let html='';
+  ids.forEach(id=>{
+    const cl=ardClients[id];
+    const total=cl.items.reduce((s,i)=>s+i.price*i.qty,0);
+    const isActive=id===ardActiveId;
+    html+='<button class="ard-client-btn'+(isActive?' active':'')+'" data-ardid="'+id+'">'
+      +'👤 '+cl.name+' '
+      +'<span class="ard-client-badge'+(cl.items.length===0?' zero':'')+'">'+cl.items.length+'</span>'
+      +(cl.items.length?'<span class="ard-client-total-chip">'+fmtEur(total)+'</span>':'')
+      +'</button>';
+  });
+  wrap.innerHTML=html;
+  wrap.querySelectorAll('.ard-client-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){ardSelectClient(this.dataset.ardid);});
+  });
+}
+
+function ardSelectClient(id){
+  ardActiveId=id;ardRenderClients();ardRenderItems();ardRenderSummary();
+}
+
+function ardRenderItems(){
+  const list=document.getElementById('ard-items-list');
+  if(!list)return;
+  if(!ardActiveId||!ardClients[ardActiveId]){
+    list.innerHTML='<div class="ard-empty-items">👆 Sélectionnez ou créez un client<br>pour démarrer une ardoise</div>';return;
+  }
+  const items=ardClients[ardActiveId].items;
+  if(!items.length){
+    list.innerHTML='<div class="ard-empty-items">Aucune consommation<br><span style="font-size:12px;color:var(--muted2);">Utilisez le formulaire ci-dessus</span></div>';return;
+  }
+  list.innerHTML=items.map((it,i)=>{
+    const artRef=articles.find(a=>a.name===it.name||a.id===it.artId);
+    const col=getCatColor(artRef?.catId||'');
+    const bg=col+'22';
+    return '<div class="ard-item">'
+      +'<div class="ard-item-color-bar" style="background:'+col+';"></div>'
+      +'<span class="ard-item-cat" style="background:'+bg+';color:'+col+';">'+it.cat+'</span>'
+      +'<div class="ard-item-info">'
+        +'<div class="ard-item-name">'+it.name+'</div>'
+        +'<div class="ard-item-unit">'+fmtEur(it.price)+' / unité</div>'
+      +'</div>'
+      +'<div class="ard-qty-ctrl">'
+        +'<button class="ard-qty-btn" onclick="ardChangeQty('+i+',-1)">−</button>'
+        +'<span class="ard-qty-val">'+it.qty+'</span>'
+        +'<button class="ard-qty-btn" onclick="ardChangeQty('+i+',1)">+</button>'
+      +'</div>'
+      +'<div class="ard-item-total">'+fmtEur(it.price*it.qty)+'</div>'
+      +'<button class="ard-item-del" onclick="ardRemoveItem('+i+')" title="Retirer">✕</button>'
+    +'</div>';
+  }).join('');
+}
+
+function ardRenderSummary(){
+  const box=document.getElementById('ard-summary');
+  const totalWrap=document.getElementById('ard-total-wrap');
+  const paySection=document.getElementById('ard-pay-section');
+  const payBtn=document.getElementById('ard-pay-btn');
+  const delBtn=document.getElementById('ard-del-btn');
+  const clientDisplay=document.getElementById('ard-client-display');
+  const clientDisplayName=document.getElementById('ard-client-display-name');
+  if(!box)return;
+
+  if(!ardActiveId||!ardClients[ardActiveId]){
+    box.innerHTML='<div class="ard-no-client-msg">👆 Sélectionnez un client<br>pour voir le récapitulatif</div>';
+    if(totalWrap)totalWrap.style.display='none';
+    if(paySection)paySection.style.display='none';
+    if(payBtn){payBtn.disabled=true;}
+    if(delBtn)delBtn.style.display='none';
+    if(clientDisplay)clientDisplay.style.display='none';
+    return;
+  }
+
+  const cl=ardClients[ardActiveId];
+  const total=cl.items.reduce((s,i)=>s+i.price*i.qty,0);
+  const hasItems=cl.items.length>0;
+
+  // Nom client affiché
+  if(clientDisplay){clientDisplay.style.display='flex';}
+  if(clientDisplayName)clientDisplayName.textContent=cl.name;
+
+  // Résumé items
+  if(!hasItems){
+    box.innerHTML='<div style="text-align:center;padding:24px 12px;color:var(--muted);font-size:12px;">Aucune consommation</div>';
+  } else {
+    box.innerHTML='<div class="ard-summary-items">'
+      +cl.items.map(it=>'<div class="ard-summary-item">'
+        +'<span class="ard-summary-item-name">'+it.name+'</span>'
+        +'<span class="ard-summary-item-qty">×'+it.qty+'</span>'
+        +'<span class="ard-summary-item-price">'+fmtEur(it.price*it.qty)+'</span>'
+      +'</div>').join('')
+    +'</div>';
+  }
+
+  // Total
+  if(totalWrap){totalWrap.style.display=hasItems?'block':'none';}
+  const totalEl=document.getElementById('ard-total-display');
+  if(totalEl)totalEl.textContent=fmtEur(total);
+
+  // Section paiement
+  if(paySection)paySection.style.display=hasItems?'block':'none';
+  if(payBtn){payBtn.disabled=!hasItems;}
+  if(delBtn)delBtn.style.display='block';
+}
+
+function ardAddItem(){
+  if(!ardActiveId){toast("Sélectionnez un client d'abord",'error');return;}
+  const artSel=document.getElementById('ard-sel-art');
+  const artId=artSel.value;
+  const qty=parseInt(document.getElementById('ard-qty').value)||1;
+  if(!artId){toast('Choisissez un article','error');return;}
+  const opt=artSel.options[artSel.selectedIndex];
+  const name=opt.dataset.name||'Article';
+  const price=parseFloat(opt.dataset.price)||0;
+  const cat=opt.dataset.cat||'—';
+  const items=ardClients[ardActiveId].items;
+  const ex=items.find(i=>i.artId===artId);
+  if(ex){ex.qty+=qty;}else{items.push({artId,name,cat,price,qty});}
+  artSel.value='';document.getElementById('ard-qty').value='1';
+  ardRenderClients();ardRenderItems();ardRenderSummary();
+  toast('✓ '+name+' ×'+qty+' ajouté','success');
+}
+
+function ardChangeQty(i,delta){
+  if(!ardActiveId)return;
+  const items=ardClients[ardActiveId].items;
+  items[i].qty+=delta;
+  if(items[i].qty<=0)items.splice(i,1);
+  ardRenderClients();ardRenderItems();ardRenderSummary();
+}
+
+function ardRemoveItem(i){
+  if(!ardActiveId)return;
+  ardClients[ardActiveId].items.splice(i,1);
+  ardRenderClients();ardRenderItems();ardRenderSummary();
+}
+
+function ardNewClient(){
+  document.getElementById('ard-client-name-inp').value='';
+  document.getElementById('ard-name-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('ard-client-name-inp').focus(),120);
+}
+function ardCloseModal(){document.getElementById('ard-name-modal').classList.remove('open');}
+function ardConfirmClient(){
+  const name=(document.getElementById('ard-client-name-inp').value||'').trim();
+  if(!name){toast('Entrez un nom','error');return;}
+  if(Object.values(ardClients).find(c=>c.name.toLowerCase()===name.toLowerCase())){toast("Ce nom est déjà utilisé",'error');return;}
+  const id=ardGenId();
+  ardClients[id]={name,items:[]};
+  ardCloseModal();
+  ardSelectClient(id);
+  toast('Ardoise de '+name+' créée','success');
+}
+
+function ardDeleteClient(){
+  if(!ardActiveId)return;
+  const name=ardClients[ardActiveId]?.name||'?';
+  if(!confirm("Supprimer l'ardoise de "+name+" ?"))return;
+  delete ardClients[ardActiveId];
+  ardActiveId=Object.keys(ardClients)[0]||null;
+  ardRenderClients();ardRenderItems();ardRenderSummary();
+  toast('Ardoise de '+name+' supprimée','info');
+}
+
+async function ardPay(){
+  if(!ardActiveId){toast('Aucun client sélectionné','error');return;}
+  const cl=ardClients[ardActiveId];
+  if(!cl||!cl.items.length){toast("L'ardoise est vide",'error');return;}
+  const total=cl.items.reduce((s,i)=>s+i.price*i.qty,0);
+  if(!confirm("Encaisser "+fmtEur(total)+" pour "+cl.name+" ("+ardPayMode+") ?"))return;
+  const tx={
+    id:'tx'+Date.now(),
+    receiptNum:'ARD-'+Date.now().toString().slice(-6),
+    date:new Date().toISOString(),
+    caissier:currentUser?.username||'?',
+    mode:ardPayMode,
+    items:cl.items.map(i=>({artId:i.artId,name:i.name,cat:i.cat,price:i.price,qty:i.qty,subtotal:i.price*i.qty})),
+    subtotal:total,tva:0,total,
+    client:cl.name,source:'ardoise'
+  };
+  transactions.unshift(tx);
+  saveLocalData('cf_transactions',transactions);
+  fbSave('pos_transactions',tx.id,tx);
+  const name=cl.name;
+  delete ardClients[ardActiveId];
+  ardActiveId=Object.keys(ardClients)[0]||null;
+  ardRenderClients();ardRenderItems();ardRenderSummary();
+  toast('✅ Ardoise de '+name+' encaissée — '+fmtEur(total),'success');
+}
+
+
 document.addEventListener('DOMContentLoaded', ()=>{
-  ensureDefaultAdmin();
-  document.getElementById('loading-screen').style.display='flex';
-  document.getElementById('login-page').style.display='none';
-  tryAutoLogin();
+  // État sûr par défaut : login visible, tout le reste caché
+  document.getElementById('login-page').style.display='flex';
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('app').style.display='none';
+
+  try{ ensureDefaultAdmin(); }catch(e){}
+
   document.querySelectorAll('.modal-overlay').forEach(m=>{
     m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
   });
+
+  // Auto-login si session existante — enveloppé dans try/catch total
+  try{ tryAutoLogin(); }catch(e){ showLogin(); }
+});
+
+// Garde-fou global : si JS plante après chargement, on reste sur login
+window.addEventListener('error', ()=>{
+  if(!currentUser){
+    try{
+      document.getElementById('login-page').style.display='flex';
+      document.getElementById('loading-screen').style.display='none';
+      document.getElementById('btn-login').disabled=false;
+      document.getElementById('btn-login').textContent='Se connecter →';
+    }catch(e2){}
+  }
 });
 </script>
 </body>
